@@ -218,7 +218,8 @@ class Translate:
                     fEnPara = True
                     print(line)
 
-                else:            # We are NOT in the 'enpara' environment. We must parse the line carefully by treating it as nested strings
+                else:  # We are NOT in the 'enpara' environment. We must parse the line
+                       # carefully by treating it as nested strings
 
                     print(self.e2u_substr(line))
 
@@ -241,6 +242,28 @@ class Translate:
         if line[1] == "\\":        # Double slash, just render it as is,
 
             return "\\" + self.e2u_substr(line[2:])        # Use recursion to relegate conversion of the remaining string
+
+        # If a \begin{} environment is found render the \begin{...} as is passing the
+        # rest on for translation
+        if line[1:7] == "begin{":
+            # Find first character after '}'
+            j = k = 7
+
+            while k + 1 < len(line) and line[k] != '}':
+                k += 1
+
+            return line[:k+1] + self.e2u_substr(line[k+1:])
+
+        # Treat \end{} the same way as \begin{} above
+        elif line[1:5] == "end{":
+            # Find first character after '}'
+            j = k = 5
+
+            while k + 1 < len(line) and line[k] != '}':
+                k += 1
+
+            return line[:k+1] + self.e2u_substr(line[k+1:])
+
 
         # We have a macro to deal with. We must figure out what type of macro is it:
         #
